@@ -46,7 +46,14 @@ func (d *AnomalyDetector) Detect(hosts []models.SSHInfo) []models.Finding {
 		rttStats := d.calculateStats(rtts)
 		for hostKey, metrics := range hostMetrics {
 			rttValue := metrics["rtt"]
-			zScore := (rttValue - rttStats.mean) / rttStats.stdDev
+			// Prefer a robust modified Z-score based on MAD when available
+			var zScore float64
+			if rttStats.mad > 0 {
+				// Modified Z-score: 0.6745 * (x - median) / MAD
+				zScore = 0.6745 * (rttValue - rttStats.median) / rttStats.mad
+			} else {
+				zScore = (rttValue - rttStats.mean) / rttStats.stdDev
+			}
 
 			if math.Abs(zScore) > d.threshold {
 				findings = append(findings, d.createAnomalyFinding(
@@ -61,7 +68,13 @@ func (d *AnomalyDetector) Detect(hosts []models.SSHInfo) []models.Finding {
 		kexStats := d.calculateStats(kexTimes)
 		for hostKey, metrics := range hostMetrics {
 			kexValue := metrics["kex_time"]
-			zScore := (kexValue - kexStats.mean) / kexStats.stdDev
+			// Use MAD-based modified Z-score when possible for robustness
+			var zScore float64
+			if kexStats.mad > 0 {
+				zScore = 0.6745 * (kexValue - kexStats.median) / kexStats.mad
+			} else {
+				zScore = (kexValue - kexStats.mean) / kexStats.stdDev
+			}
 
 			if math.Abs(zScore) > d.threshold {
 				findings = append(findings, d.createAnomalyFinding(
@@ -188,7 +201,10 @@ func parseHostPort(hostKey string) int {
 	port := 0
 	for i := len(hostKey) - 1; i >= 0; i-- {
 		if hostKey[i] == ':' {
-			fmt.Sscanf(hostKey[i+1:], "%d", &port)
+			if _, err := fmt.Sscanf(hostKey[i+1:], "%d", &port); err != nil {
+				// If parsing fails, return default SSH port
+				return 22
+			}
 			return port
 		}
 	}

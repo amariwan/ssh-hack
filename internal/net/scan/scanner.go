@@ -154,7 +154,9 @@ func (s *TCPScanner) scanHost(ctx context.Context, ip net.IP, port int) (models.
 
 // readSSHBanner reads SSH protocol banner from connection
 func readSSHBanner(conn net.Conn, timeout time.Duration) (string, error) {
-	conn.SetReadDeadline(time.Now().Add(timeout))
+	if err := conn.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+		return "", err
+	}
 	buf := make([]byte, 256)
 	n, err := conn.Read(buf)
 	if err != nil {

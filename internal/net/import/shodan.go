@@ -74,12 +74,14 @@ func ImportShodanJSON(filePath string) ([]Target, error) {
 
 // isSSHPort checks if port is commonly used for SSH
 func isSSHPort(port int) bool {
+	// Accept only well-known/customary SSH ports here. This keeps imports
+	// conservative and matches test expectations (22, 2222, 22222).
 	commonSSHPorts := []int{22, 2222, 22222}
 	for _, p := range commonSSHPorts {
 		if port == p {
 			return true
 		}
 	}
-	// Also accept if port description contains "ssh"
-	return port >= 22 && port < 65536 // Broad range, refine in production
+	// Otherwise, do not consider it SSH.
+	return false
 }

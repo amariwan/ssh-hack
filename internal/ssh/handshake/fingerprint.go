@@ -61,6 +61,10 @@ func (f *Fingerprinter) GetRiskModifier(implType models.ImplementationType) int 
 			return pattern.RiskModifier
 		}
 	}
+	// Unknown implementation should be treated as higher risk by default
+	if implType == models.ImplUnknown {
+		return 10
+	}
 	return 0
 }
 
