@@ -1,8 +1,9 @@
-# 🔐 Enterprise SSH Inventory & Hardening Auditor
+# 🔐 Enterprise SSH Inventory & Hardening Auditor v2.0
 
-[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/Security-Compliant-green.svg)](SECURITY.md)
+[![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)](CHANGELOG.md)
 
 **Professional SSH infrastructure security auditing tool** for enterprises and security teams.
 
@@ -15,8 +16,14 @@ Systematically discover, analyze, and harden SSH infrastructure across networks:
 - ✅ **Policy Auditing**: `sshd -T` + `sshd_config` compliance checks
 - ✅ **CVE Mapping**: Version → vulnerability correlation (offline DB)
 - ✅ **Risk Scoring**: Baseline drift detection with 0-100 risk scores
-- ✅ **Reporting**: JSON, Markdown, SARIF (CI/CD integration)
+- ✅ **Reporting**: JSON, Markdown, SARIF, **HTML dashboards** (NEW v2)
 - ✅ **Zero-Trust**: Consent-gated, auditable, sanitized logging
+- 🆕 **Remediation**: Auto-generated fix scripts (v2)
+- 🆕 **Fingerprinting**: SSH implementation detection (OpenSSH, Dropbear, etc.)
+- 🆕 **Anomaly Detection**: Statistical outliers (honeypots, rate limiting)
+- 🆕 **Scheduling**: Periodic scans with Slack alerts (v2)
+- 🆕 **Import**: Shodan/Nmap target lists (v2)
+- 🆕 **Cloud Discovery**: AWS EC2 auto-discovery (v2)
 
 ## 🚨 Legal & Ethics
 
@@ -33,9 +40,9 @@ Systematically discover, analyze, and harden SSH infrastructure across networks:
 
 ### Prerequisites
 
-- Go 1.21+
-- SSH access credentials (for policy checks)
+- Go 1.24+
 - Linux/macOS/Windows
+- (Optional) AWS credentials for cloud discovery
 
 ### Installation
 
@@ -44,16 +51,19 @@ Systematically discover, analyze, and harden SSH infrastructure across networks:
 git clone https://github.com/amariwan/ssh-hack.git
 cd ssh-hack
 
-# Build
+# Default build (core features)
 go build -o ssh-audit ./cmd/ssh-audit
 
-# Run
+# Full build with all features
+go build -tags "sched,nmap,cloud" -o ssh-audit ./cmd/ssh-audit
+
+# Run basic scan
 ./ssh-audit \
   --allowlist 192.168.1.0/24 \
   --ports 22,2222 \
   --i-am-authorized \
   --output-json report.json \
-  --output-markdown report.md
+  --output-html dashboard.html
 ```
 
 ### Docker
@@ -64,7 +74,8 @@ docker run --rm -v $(pwd)/configs:/configs -v $(pwd)/reports:/reports \
   ssh-audit \
   --allowlist 10.0.0.0/24 \
   --i-am-authorized \
-  --output-json /reports/audit.json
+  --output-json /reports/audit.json \
+  --output-html /reports/dashboard.html
 ```
 
 ## 📖 Usage
@@ -77,6 +88,73 @@ ssh-audit \
   --ports 22 \
   --concurrency 100 \
   --timeout 5 \
+  --i-am-authorized
+```
+
+### v2 Features
+
+#### HTML Dashboard with Live Server
+
+```bash
+# Generate interactive HTML report
+ssh-audit --allowlist 10.0.0.0/24 \
+  --output-html dashboard.html \
+  --serve \
+  --i-am-authorized
+
+# Opens http://localhost:8080 with D3.js charts
+```
+
+#### Import from Shodan
+
+```bash
+# Export from Shodan API
+shodan search "port:22" --fields ip_str,port,data,hostnames > shodan.json
+
+# Import targets
+ssh-audit --import-shodan shodan.json --i-am-authorized
+```
+
+#### Import from Nmap (requires 'nmap' build tag)
+
+```bash
+# Scan with Nmap
+nmap -sV -p 22,2222 10.0.0.0/24 -oX scan.xml
+
+# Import and analyze
+go build -tags nmap -o ssh-audit ./cmd/ssh-audit
+./ssh-audit --import-nmap-xml scan.xml --i-am-authorized
+```
+
+#### Scheduled Scans with Alerts (requires 'sched' build tag)
+
+```bash
+# Build with scheduler
+go build -tags sched -o ssh-audit ./cmd/ssh-audit
+
+# Run daily at 3 AM, alert on 10% score drop
+./ssh-audit \
+  --allowlist 10.0.0.0/24 \
+  --schedule "0 3 * * *" \
+  --alert-slack-webhook https://hooks.slack.com/services/XXX \
+  --alert-threshold 10.0 \
+  --i-am-authorized
+
+# Stores trends in sqlite, runs continuously
+```
+
+#### AWS EC2 Discovery (requires 'cloud' build tag)
+
+```bash
+# Build with cloud support
+go build -tags cloud -o ssh-audit ./cmd/ssh-audit
+
+# Discover EC2 instances
+export AWS_REGION=us-east-1
+./ssh-audit \
+  --provider aws \
+  --aws-region us-east-1 \
+  --aws-public-ip \
   --i-am-authorized
 ```
 
@@ -95,8 +173,10 @@ ssh-audit \
   --output-json reports/scan.json \
   --output-markdown reports/scan.md \
   --output-sarif reports/scan.sarif \
+  --output-html reports/dashboard.html \
   --fail-on high \
-  --log-level debug
+  --log-level debug \
+  --i-am-authorized
 ```
 
 ### CI/CD Integration
@@ -105,16 +185,24 @@ ssh-audit \
 # GitHub Actions example
 - name: SSH Security Audit
   run: |
+    go build -o ssh-audit ./cmd/ssh-audit
     ./ssh-audit \
       --allowlist ${{ secrets.PROD_CIDR }} \
       --i-am-authorized \
       --output-sarif results.sarif \
+      --output-html dashboard.html \
       --fail-on critical
 
 - name: Upload SARIF
   uses: github/codeql-action/upload-sarif@v2
   with:
     sarif_file: results.sarif
+
+- name: Upload HTML Dashboard
+  uses: actions/upload-artifact@v3
+  with:
+    name: ssh-audit-dashboard
+    path: dashboard.html
 ```
 
 ## 🏗️ Architecture
