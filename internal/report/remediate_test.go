@@ -3,7 +3,6 @@ package report
 import (
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/amariwan/ssh-hack/internal/models"
 )
@@ -12,8 +11,8 @@ func TestRemediationGenerator(t *testing.T) {
 	gen := NewRemediationGenerator()
 
 	tests := []struct {
-		name     string
-		finding  models.Finding
+		name         string
+		finding      models.Finding
 		wantContains []string
 	}{
 		{

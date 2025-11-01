@@ -21,7 +21,7 @@ func TestEngine_CheckKexAlgorithms(t *testing.T) {
 		Host: models.Host{IP: []byte{127, 0, 0, 1}, Port: 22},
 		KexAlgorithms: []string{
 			"curve25519-sha256",
-			"diffie-hellman-group1-sha1", // forbidden
+			"diffie-hellman-group1-sha1",  // forbidden
 			"diffie-hellman-group14-sha1", // deprecated
 		},
 	}

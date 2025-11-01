@@ -69,9 +69,9 @@ func (s *TCPScanner) Scan(ctx context.Context, targets []string, ports []int) ([
 
 	// Process jobs concurrently
 	var (
-		wg      sync.WaitGroup
-		mu      sync.Mutex
-		hosts   []models.Host
+		wg    sync.WaitGroup
+		mu    sync.Mutex
+		hosts []models.Host
 	)
 
 	for i := 0; i < s.Concurrency; i++ {

@@ -11,10 +11,10 @@ import (
 // ImplementationPattern defines SSH implementation fingerprint
 type ImplementationPattern struct {
 	Type           models.ImplementationType `yaml:"type"`
-	BannerRegex    []string                 `yaml:"banner_regex"`
-	KexOrder       []string                 `yaml:"kex_order,omitempty"`     // Expected KEX algorithm order
-	VersionPattern string                   `yaml:"version_pattern,omitempty"`
-	RiskModifier   int                      `yaml:"risk_modifier"` // +10 for exotic, 0 for mainstream
+	BannerRegex    []string                  `yaml:"banner_regex"`
+	KexOrder       []string                  `yaml:"kex_order,omitempty"` // Expected KEX algorithm order
+	VersionPattern string                    `yaml:"version_pattern,omitempty"`
+	RiskModifier   int                       `yaml:"risk_modifier"` // +10 for exotic, 0 for mainstream
 }
 
 // Fingerprinter identifies SSH implementations

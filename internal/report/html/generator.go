@@ -99,11 +99,11 @@ func prepareTemplateData(report *models.Report) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"Report":          report,
-		"OverallScore":    overallScore,
-		"FindingsByHost":  findingsByHost,
-		"SeverityData":    severityData,
-		"GeneratedTime":   time.Now().Format(time.RFC1123),
+		"Report":         report,
+		"OverallScore":   overallScore,
+		"FindingsByHost": findingsByHost,
+		"SeverityData":   severityData,
+		"GeneratedTime":  time.Now().Format(time.RFC1123),
 	}
 }
 

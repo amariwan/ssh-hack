@@ -28,8 +28,8 @@ type Baseline struct {
 	} `yaml:"macs"`
 
 	HostKeys struct {
-		Allowed       []string `yaml:"allowed"`
-		MinKeySizes   map[string]int `yaml:"min_key_sizes"`
+		Allowed     []string       `yaml:"allowed"`
+		MinKeySizes map[string]int `yaml:"min_key_sizes"`
 	} `yaml:"host_keys"`
 
 	Policies struct {

@@ -14,11 +14,11 @@ type ShodanResult struct {
 
 // ShodanHost represents a single Shodan host
 type ShodanHost struct {
-	IPStr    string   `json:"ip_str"`
-	Port     int      `json:"port"`
-	Banner   string   `json:"data"`
-	Product  string   `json:"product"`
-	Version  string   `json:"version"`
+	IPStr     string   `json:"ip_str"`
+	Port      int      `json:"port"`
+	Banner    string   `json:"data"`
+	Product   string   `json:"product"`
+	Version   string   `json:"version"`
 	Hostnames []string `json:"hostnames"`
 }
 

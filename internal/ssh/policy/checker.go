@@ -88,7 +88,7 @@ func (c *RemoteChecker) connect(host models.Host, creds *Credentials) (*ssh.Clie
 		User:            creds.Username,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Accept any host key
-		Timeout:         0, // Use default
+		Timeout:         0,                           // Use default
 	}
 
 	client, err := ssh.Dial("tcp", addr, config)

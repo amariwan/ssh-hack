@@ -1,6 +1,7 @@
 package analyze
 
 import (
+	"net"
 	"testing"
 	"time"
 
@@ -100,9 +101,7 @@ func TestCalculateStats(t *testing.T) {
 	}
 }
 
-func parseIP(s string) models.IP {
+func parseIP(s string) net.IP {
 	// Helper to create IP for tests
-	var ip models.IP
-	// Simplified for test
-	return ip
+	return net.ParseIP(s)
 }

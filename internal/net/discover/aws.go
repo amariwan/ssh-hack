@@ -8,19 +8,19 @@ import (
 	"fmt"
 	"net"
 
+	import_targets "github.com/amariwan/ssh-hack/internal/net/import"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	import_targets "github.com/amariwan/ssh-hack/internal/net/import"
 )
 
 // AWSDiscoveryConfig holds AWS discovery parameters
 type AWSDiscoveryConfig struct {
-	Region          string
-	UsePublicIP     bool
-	UsePrivateIP    bool
-	TagFilters      map[string]string // Optional: filter by tags
-	IncludeStopped  bool
+	Region         string
+	UsePublicIP    bool
+	UsePrivateIP   bool
+	TagFilters     map[string]string // Optional: filter by tags
+	IncludeStopped bool
 }
 
 // AWSDiscoverer discovers EC2 instances

@@ -10,11 +10,11 @@ func TestFingerprinter_Identify(t *testing.T) {
 	fp := NewFingerprinter()
 
 	tests := []struct {
-		name          string
-		banner        string
-		kexAlgos      []string
-		wantType      models.ImplementationType
-		wantConfMin   float64
+		name        string
+		banner      string
+		kexAlgos    []string
+		wantType    models.ImplementationType
+		wantConfMin float64
 	}{
 		{
 			name:        "OpenSSH standard",
@@ -140,8 +140,8 @@ func TestKexOrderSimilarity(t *testing.T) {
 
 func TestExtractVersion(t *testing.T) {
 	tests := []struct {
-		banner  string
-		want    string
+		banner string
+		want   string
 	}{
 		{"SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5", "OpenSSH_8.2p1"},
 		{"SSH-2.0-dropbear_2020.81", "dropbear_2020.81"},

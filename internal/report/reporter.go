@@ -239,13 +239,13 @@ func groupBySeverity(findings []models.Finding) map[models.SeverityLevel][]model
 // GenerateSummary creates summary statistics from findings
 func GenerateSummary(hosts []models.SSHInfo, findings []models.Finding) models.Summary {
 	summary := models.Summary{
-		TotalHosts:        len(hosts),
-		TotalFindings:     len(findings),
+		TotalHosts:         len(hosts),
+		TotalFindings:      len(findings),
 		FindingsBySeverity: make(map[models.SeverityLevel]int),
-		WeakKexUsage:      make(map[string]int),
-		WeakCipherUsage:   make(map[string]int),
-		WeakMACUsage:      make(map[string]int),
-		CVECounts:         make(map[string]int),
+		WeakKexUsage:       make(map[string]int),
+		WeakCipherUsage:    make(map[string]int),
+		WeakMACUsage:       make(map[string]int),
+		CVECounts:          make(map[string]int),
 	}
 
 	for _, f := range findings {
