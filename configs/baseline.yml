@@ -1,0 +1,83 @@
+# SSH Security Baseline Configuration
+
+kex_algorithms:
+  allowed:
+  - curve25519-sha256
+  - curve25519-sha256@libssh.org
+  - ecdh-sha2-nistp256
+  - ecdh-sha2-nistp384
+  - ecdh-sha2-nistp521
+  - diffie-hellman-group-exchange-sha256
+  - diffie-hellman-group16-sha512
+  - diffie-hellman-group18-sha512
+
+  deprecated:
+  - diffie-hellman-group14-sha256
+  - diffie-hellman-group14-sha1
+
+  forbidden:
+  - diffie-hellman-group1-sha1
+  - diffie-hellman-group-exchange-sha1
+
+ciphers:
+  allowed:
+  - chacha20-poly1305@openssh.com
+  - aes256-gcm@openssh.com
+  - aes128-gcm@openssh.com
+  - aes256-ctr
+  - aes192-ctr
+  - aes128-ctr
+
+  deprecated:
+  - aes256-cbc
+  - aes192-cbc
+  - aes128-cbc
+
+  forbidden:
+  - 3des-cbc
+  - arcfour
+  - arcfour128
+  - arcfour256
+  - blowfish-cbc
+  - cast128-cbc
+
+macs:
+  allowed:
+  - hmac-sha2-256-etm@openssh.com
+  - hmac-sha2-512-etm@openssh.com
+  - hmac-sha2-256
+  - hmac-sha2-512
+
+  deprecated:
+  - hmac-sha1-etm@openssh.com
+  - hmac-sha1
+
+  forbidden:
+  - hmac-md5
+  - hmac-md5-96
+  - hmac-md5-etm@openssh.com
+  - hmac-sha1-96
+
+host_keys:
+  allowed:
+  - ssh-ed25519
+  - ecdsa-sha2-nistp256
+  - ecdsa-sha2-nistp384
+  - ecdsa-sha2-nistp521
+  - rsa-sha2-512
+  - rsa-sha2-256
+
+  min_key_sizes:
+    ssh-rsa: 3072
+    rsa-sha2-256: 3072
+    rsa-sha2-512: 3072
+    ecdsa-sha2-nistp256: 256
+    ecdsa-sha2-nistp384: 384
+    ecdsa-sha2-nistp521: 521
+    ssh-ed25519: 256
+
+policies:
+  password_authentication: false
+  permit_root_login: "no"
+  max_auth_tries: 3
+  permit_empty_passwords: false

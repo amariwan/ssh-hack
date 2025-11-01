@@ -1,0 +1,100 @@
+# SSH Vulnerability Database
+
+vulnerabilities:
+- cve: CVE-2023-48795
+  title: "Terrapin Attack - SSH protocol weakness"
+  description: "Prefix truncation attack against SSH connection integrity"
+  severity: medium
+  affected_versions:
+  - "OpenSSH_9.5"
+  - "OpenSSH_9.4"
+  - "OpenSSH_9.3"
+  - "OpenSSH_9.2"
+  - "OpenSSH_9.1"
+  - "OpenSSH_9.0"
+  fixed_in: "OpenSSH_9.6"
+
+- cve: CVE-2023-38408
+  title: "Remote Code Execution via ssh-agent forwarding"
+  description: "Condition where libraries loaded via ssh-agent could lead to RCE"
+  severity: high
+  affected_versions:
+  - "OpenSSH_9.3p1"
+  - "OpenSSH_9.2p1"
+  - "OpenSSH_9.1p1"
+  fixed_in: "OpenSSH_9.3p2"
+
+- cve: CVE-2021-41617
+  title: "Privilege escalation in ssh-agent forwarding"
+  description: "sshd could allow privilege escalation via agent forwarding"
+  severity: high
+  affected_versions:
+  - "OpenSSH_6.2"
+  - "OpenSSH_6.3"
+  - "OpenSSH_6.4"
+  - "OpenSSH_6.5"
+  - "OpenSSH_6.6"
+  - "OpenSSH_6.7"
+  - "OpenSSH_6.8"
+  - "OpenSSH_6.9"
+  - "OpenSSH_7.0"
+  - "OpenSSH_7.1"
+  - "OpenSSH_7.2"
+  - "OpenSSH_7.3"
+  - "OpenSSH_7.4"
+  - "OpenSSH_7.5"
+  - "OpenSSH_7.6"
+  - "OpenSSH_7.7"
+  - "OpenSSH_7.8"
+  - "OpenSSH_7.9"
+  - "OpenSSH_8.0"
+  - "OpenSSH_8.1"
+  - "OpenSSH_8.2"
+  - "OpenSSH_8.3"
+  - "OpenSSH_8.4"
+  - "OpenSSH_8.5"
+  - "OpenSSH_8.6"
+  - "OpenSSH_8.7"
+  fixed_in: "OpenSSH_8.8"
+
+- cve: CVE-2020-15778
+  title: "Command injection via scp"
+  description: "scp client allows command injection via filenames"
+  severity: medium
+  affected_versions:
+  - "OpenSSH_8.3"
+  - "OpenSSH_8.2"
+  - "OpenSSH_8.1"
+  - "OpenSSH_8.0"
+  fixed_in: "OpenSSH_8.4"
+
+- cve: CVE-2018-20685
+  title: "scp client vulnerability"
+  description: "scp client allows servers to manipulate client-side filesystem"
+  severity: medium
+  affected_versions:
+  - "OpenSSH_7.9"
+  - "OpenSSH_7.8"
+  - "OpenSSH_7.7"
+  fixed_in: "OpenSSH_8.0"
+
+- cve: CVE-2016-10012
+  title: "Bounds check errors in shared memory manager"
+  description: "Pre-authentication memory corruption in privilege separation"
+  severity: critical
+  affected_versions:
+  - "OpenSSH_7.4"
+  - "OpenSSH_7.3"
+  - "OpenSSH_7.2"
+  - "OpenSSH_7.1"
+  - "OpenSSH_7.0"
+  fixed_in: "OpenSSH_7.4p1"
+
+- cve: CVE-2016-10009
+  title: "Untrusted X11 forwarding"
+  description: "X11 forwarding can bypass authentication"
+  severity: medium
+  affected_versions:
+  - "OpenSSH_7.3"
+  - "OpenSSH_7.2"
+  fixed_in: "OpenSSH_7.4"

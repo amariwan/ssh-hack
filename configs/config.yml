@@ -1,0 +1,35 @@
+# Example configuration for ssh-audit
+
+# Scan targets (CIDR notation or single IPs)
+allowlist:
+- 192.168.1.0/24
+- 10.0.0.0/8
+
+# Ports to scan
+ports:
+- 22
+- 2222
+- 8022
+
+# Performance settings
+concurrency: 100
+timeout: 5
+rate_limit: 200
+
+# Discovery options
+dns_reverse: true
+
+# Output options
+output_json: "reports/audit.json"
+output_markdown: "reports/audit.md"
+output_sarif: "reports/audit.sarif"
+
+# Security baseline
+baseline: "configs/baseline.yml"
+vulns: "configs/vulns.yml"
+
+# CI/CD integration
+fail_on: "high" # Options: critical, high, medium, low, info
+
+# Logging
+log_level: "info" # Options: debug, info, warn, error

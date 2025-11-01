@@ -1,0 +1,42 @@
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Binary
+ssh-audit
+build/
+dist/
+.history/
+
+# Reports
+*.json
+*.md
+!README.md
+*.sarif
+reports/
+
+# Go
+vendor/
+coverage.out
+*.coverprofile
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Logs
+*.log
