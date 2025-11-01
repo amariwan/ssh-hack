@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"regexp"
@@ -22,7 +23,9 @@ type SlogLogger struct {
 }
 
 // NewLogger creates a new structured logger
-func NewLogger(level string) Logger {
+// InitLogger initializes a structured logger that writes to stderr by default.
+// If logFile is non-empty it will also write to the provided file path (appended).
+func InitLogger(level string, logFile string) (Logger, error) {
 	var slogLevel slog.Level
 	switch strings.ToLower(level) {
 	case "debug":
@@ -37,12 +40,27 @@ func NewLogger(level string) Logger {
 		slogLevel = slog.LevelInfo
 	}
 
-	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+	var writer io.Writer = os.Stderr
+	if logFile != "" {
+		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open log file: %w", err)
+		}
+		writer = io.MultiWriter(os.Stderr, f)
+	}
+
+	handler := slog.NewTextHandler(writer, &slog.HandlerOptions{
 		Level: slogLevel,
 	})
 	logger := slog.New(handler)
 
-	return &SlogLogger{logger: logger}
+	return &SlogLogger{logger: logger}, nil
+}
+
+// NewLogger kept for backward compatibility and writes to stderr only.
+func NewLogger(level string) Logger {
+	lg, _ := InitLogger(level, "")
+	return lg
 }
 
 func (l *SlogLogger) Debug(msg string, args ...interface{}) {
