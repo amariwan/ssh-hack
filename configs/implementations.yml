@@ -1,0 +1,50 @@
+# SSH Implementation Fingerprint Patterns
+# Used for detecting SSH server implementations and adjusting risk scores
+
+- type: OpenSSH
+  banner_regex:
+  - 'OpenSSH_\d+\.\d+'
+  - 'SSH-2\.0-OpenSSH'
+  kex_order:
+  - curve25519-sha256
+  - curve25519-sha256@libssh.org
+  - ecdh-sha2-nistp256
+  - ecdh-sha2-nistp384
+  - ecdh-sha2-nistp521
+  risk_modifier: 0
+
+- type: Dropbear
+  banner_regex:
+  - 'dropbear'
+  - 'SSH-2\.0-dropbear'
+  kex_order:
+  - curve25519-sha256@libssh.org
+  - ecdh-sha2-nistp521
+  - ecdh-sha2-nistp384
+  risk_modifier: 5
+
+- type: libssh
+  banner_regex:
+  - 'libssh'
+  - 'SSH-2\.0-libssh'
+  kex_order:
+  - curve25519-sha256@libssh.org
+  - ecdh-sha2-nistp256
+  risk_modifier: 8
+
+- type: Tectia
+  banner_regex:
+  - 'SSH Tectia'
+  - 'SSH-2\.0-.*Tectia'
+  risk_modifier: 3
+
+- type: Cisco IOS
+  banner_regex:
+  - 'Cisco-\d'
+  - 'SSH-2\.0-Cisco'
+  risk_modifier: 5
+
+- type: Unknown
+  banner_regex:
+  - '.*'
+  risk_modifier: 10

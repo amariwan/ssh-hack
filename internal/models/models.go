@@ -17,16 +17,18 @@ type Host struct {
 
 // SSHInfo contains SSH handshake and policy information
 type SSHInfo struct {
-	Host             Host                   `json:"host"`
-	Version          string                 `json:"version"`
-	KexAlgorithms    []string               `json:"kex_algorithms"`
-	HostKeyAlgorithms []string              `json:"host_key_algorithms"`
-	Ciphers          CipherList             `json:"ciphers"`
-	MACs             MACList                `json:"macs"`
-	Compression      []string               `json:"compression"`
-	HostKeys         []HostKeyFingerprint   `json:"host_keys"`
-	Policy           *PolicyConfig          `json:"policy,omitempty"`
-	HandshakeTime    time.Duration          `json:"handshake_time"`
+	Host               Host                   `json:"host"`
+	Version            string                 `json:"version"`
+	KexAlgorithms      []string               `json:"kex_algorithms"`
+	HostKeyAlgorithms  []string               `json:"host_key_algorithms"`
+	Ciphers            CipherList             `json:"ciphers"`
+	MACs               MACList                `json:"macs"`
+	Compression        []string               `json:"compression"`
+	HostKeys           []HostKeyFingerprint   `json:"host_keys"`
+	Policy             *PolicyConfig          `json:"policy,omitempty"`
+	HandshakeTime      time.Duration          `json:"handshake_time"`
+	ImplementationType ImplementationType     `json:"implementation_type,omitempty"` // v2: Fingerprinting
+	ImplementationConf float64                `json:"implementation_confidence,omitempty"` // v2: 0-100%
 }
 
 // CipherList contains client-to-server and server-to-client ciphers
@@ -68,19 +70,44 @@ type PolicyConfig struct {
 	HostKeyAlgorithms       []string `json:"host_key_algorithms,omitempty"`
 }
 
+// ImplementationType identifies SSH server implementation
+type ImplementationType string
+
+const (
+	ImplOpenSSH   ImplementationType = "OpenSSH"
+	ImplDropbear  ImplementationType = "Dropbear"
+	ImplLibSSH    ImplementationType = "libssh"
+	ImplTectia    ImplementationType = "Tectia"
+	ImplCiscoIOS  ImplementationType = "Cisco IOS"
+	ImplUnknown   ImplementationType = "Unknown"
+)
+
 // Finding represents a security finding
 type Finding struct {
-	ID          string       `json:"id"`
-	HostIP      string       `json:"host_ip"`
-	Port        int          `json:"port"`
-	Category    string       `json:"category"` // "kex", "cipher", "mac", "policy", "version"
-	Title       string       `json:"title"`
-	Description string       `json:"description"`
-	Severity    SeverityLevel `json:"severity"`
-	RiskScore   int          `json:"risk_score"` // 0-100
-	Remediation string       `json:"remediation"`
-	CVEs        []string     `json:"cves,omitempty"`
-	Timestamp   time.Time    `json:"timestamp"`
+	ID                 string       `json:"id"`
+	HostIP             string       `json:"host_ip"`
+	Port               int          `json:"port"`
+	Category           string       `json:"category"` // "kex", "cipher", "mac", "policy", "version", "anomaly"
+	Title              string       `json:"title"`
+	Description        string       `json:"description"`
+	Severity           SeverityLevel `json:"severity"`
+	RiskScore          int          `json:"risk_score"` // 0-100
+	Remediation        string       `json:"remediation"`
+	RemediationScript  string       `json:"remediation_script,omitempty"` // Shell/Ansible snippet
+	CVEs               []string     `json:"cves,omitempty"`
+	Timestamp          time.Time    `json:"timestamp"`
+	ImplementationType ImplementationType `json:"implementation_type,omitempty"` // v2: Fingerprinting
+	AnomalyDetails     *AnomalyDetails    `json:"anomaly_details,omitempty"`     // v2: Anomaly metrics
+}
+
+// AnomalyDetails contains metrics for anomaly findings
+type AnomalyDetails struct {
+	MetricName     string  `json:"metric_name"`      // "rtt", "kex_duration", etc.
+	ObservedValue  float64 `json:"observed_value"`
+	ExpectedMean   float64 `json:"expected_mean"`
+	StandardDev    float64 `json:"standard_dev"`
+	ZScore         float64 `json:"z_score"`
+	DeviationPct   float64 `json:"deviation_pct"`
 }
 
 // SeverityLevel represents risk severity
@@ -112,6 +139,8 @@ type ReportMetadata struct {
 	TargetRanges  []string  `json:"target_ranges"`
 	Authorized    bool      `json:"authorized"`
 	ToolVersion   string    `json:"tool_version"`
+	SchemaVersion string    `json:"schema_version"` // v2
+	ImportSource  string    `json:"import_source,omitempty"` // v2: "shodan", "nmap", etc.
 }
 
 // Summary provides aggregated statistics

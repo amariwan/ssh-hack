@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Security Audit Dashboard - {{.Report.Metadata.ScanID}}</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .metadata { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 20px; }
+        .metadata-item { font-size: 0.9rem; opacity: 0.9; }
+        .metadata-item strong { display: block; font-size: 1.1rem; }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card h3 { color: #64748b; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; }
+        .card .value { font-size: 2.5rem; font-weight: bold; color: #1e293b; }
+        .card .subtitle { color: #94a3b8; font-size: 0.9rem; margin-top: 5px; }
+
+        .health-score {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .health-score .value { color: white; }
+
+        .chart-container { margin-bottom: 30px; }
+        .chart-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .chart-card h2 { margin-bottom: 20px; color: #1e293b; }
+
+        table { width: 100%; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        thead { background: #f8fafc; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { font-weight: 600; color: #475569; font-size: 0.9rem; text-transform: uppercase; }
+        tr:hover { background: #f8fafc; }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .severity-critical { background: #fee2e2; color: #991b1b; }
+        .severity-high { background: #fed7aa; color: #9a3412; }
+        .severity-medium { background: #fef3c7; color: #92400e; }
+        .severity-low { background: #dbeafe; color: #1e40af; }
+
+        .risk-critical { color: #dc2626; }
+        .risk-high { color: #f59e0b; }
+        .risk-medium { color: #fbbf24; }
+        .risk-low { color: #10b981; }
+
+        .host-section { margin-top: 40px; }
+        .host-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .host-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .host-title { font-size: 1.3rem; font-weight: bold; color: #1e293b; }
+        .finding-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            border-left: 4px solid #cbd5e1;
+            border-radius: 5px;
+        }
+        .finding-title { font-weight: 600; margin-bottom: 5px; }
+        .finding-desc { font-size: 0.9rem; color: #64748b; margin-bottom: 10px; }
+        .remediation {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 SSH Security Audit Dashboard</h1>
+            <div class="metadata">
+                <div class="metadata-item">
+                    <strong>Scan ID</strong>
+                    {{.Report.Metadata.ScanID}}
+                </div>
+                <div class="metadata-item">
+                    <strong>Started</strong>
+                    {{formatTime .Report.Metadata.StartTime}}
+                </div>
+                <div class="metadata-item">
+                    <strong>Duration</strong>
+                    {{formatDuration .Report.Metadata.Duration}}
+                </div>
+                <div class="metadata-item">
+                    <strong>Generated</strong>
+                    {{.GeneratedTime}}
+                </div>
+            </div>
+        </header>
+
+        <div class="summary-cards">
+            <div class="card health-score">
+                <h3>Overall Health Score</h3>
+                <div class="value">{{.OverallScore}}</div>
+                <div class="subtitle">Out of 100</div>
+            </div>
+            <div class="card">
+                <h3>Total Hosts</h3>
+                <div class="value">{{.Report.Summary.TotalHosts}}</div>
+                <div class="subtitle">Scanned successfully</div>
+            </div>
+            <div class="card">
+                <h3>Total Findings</h3>
+                <div class="value">{{.Report.Summary.TotalFindings}}</div>
+                <div class="subtitle">Security issues detected</div>
+            </div>
+            <div class="card">
+                <h3>Critical Issues</h3>
+                <div class="value risk-critical">{{index .Report.Summary.FindingsBySeverity "critical"}}</div>
+                <div class="subtitle">Require immediate action</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-card">
+                <h2>Findings by Severity</h2>
+                <div id="severity-chart"></div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2>Findings Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Severity</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .SeverityData}}
+                    <tr>
+                        <td><span class="severity-badge severity-{{.label | lower}}">{{.label}}</span></td>
+                        <td>{{.value}}</td>
+                        <td>{{if gt $.Report.Summary.TotalFindings 0}}{{printf "%.1f" (divf (mulf .value 100.0) $.Report.Summary.TotalFindings)}}%{{else}}0%{{end}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="host-section">
+            <h2 style="margin-bottom: 20px;">Host Details</h2>
+            {{range .Report.Hosts}}
+            <div class="host-card">
+                <div class="host-header">
+                    <div class="host-title">{{.Host.IP}}:{{.Host.Port}}</div>
+                    <div>
+                        <span style="color: #64748b;">{{.Version}}</span>
+                        {{if .ImplementationType}}
+                        <span class="severity-badge severity-low">{{.ImplementationType}}</span>
+                        {{end}}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.9rem;">
+                    <div><strong>Handshake:</strong> {{formatDuration .HandshakeTime}}</div>
+                    <div><strong>KEX Algos:</strong> {{len .KexAlgorithms}}</div>
+                    <div><strong>Ciphers:</strong> {{len .Ciphers.ClientToServer}}</div>
+                    {{if .Host.Hostname}}<div><strong>Hostname:</strong> {{.Host.Hostname}}</div>{{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        {{if .FindingsByHost}}
+        <div class="host-section">
+            <h2 style="margin-bottom: 20px;">Findings by Host</h2>
+            {{range $host, $findings := .FindingsByHost}}
+            <div class="host-card">
+                <div class="host-title">{{$host}}</div>
+                {{range $findings}}
+                <div class="finding-item">
+                    <div class="finding-title">
+                        <span class="severity-badge severity-{{.Severity}}">{{.Severity}}</span>
+                        {{.Title}}
+                        <span class="risk-{{riskClass .RiskScore}}">(Risk: {{.RiskScore}})</span>
+                    </div>
+                    <div class="finding-desc">{{.Description}}</div>
+                    {{if .RemediationScript}}
+                    <details>
+                        <summary style="cursor: pointer; color: #10b981; font-weight: 600;">View Remediation Script</summary>
+                        <div class="remediation">{{.RemediationScript}}</div>
+                    </details>
+                    {{end}}
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+
+    <script>
+        // D3.js Severity Chart
+        const data = {{.SeverityData}};
+        const width = 600;
+        const height = 300;
+        const margin = {top: 20, right: 20, bottom: 40, left: 60};
+
+        const svg = d3.select("#severity-chart")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", height)
+            .attr("viewBox", `0 0 ${width} ${height}`);
+
+        const x = d3.scaleBand()
+            .domain(data.map(d => d.label))
+            .range([margin.left, width - margin.right])
+            .padding(0.3);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.value) || 10])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+
+        svg.selectAll("rect")
+            .data(data)
+            .join("rect")
+            .attr("x", d => x(d.label))
+            .attr("y", d => y(d.value))
+            .attr("width", x.bandwidth())
+            .attr("height", d => y(0) - y(d.value))
+            .attr("fill", d => d.color);
+
+        svg.selectAll("text.value")
+            .data(data)
+            .join("text")
+            .attr("class", "value")
+            .attr("x", d => x(d.label) + x.bandwidth() / 2)
+            .attr("y", d => y(d.value) - 5)
+            .attr("text-anchor", "middle")
+            .attr("font-weight", "bold")
+            .text(d => d.value);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y));
+    </script>
+</body>
+</html>
