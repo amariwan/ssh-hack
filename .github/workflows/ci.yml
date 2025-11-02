@@ -26,7 +26,7 @@ permissions:
 
 defaults:
   run:
-    shell: bash -euo pipefail
+    shell: bash
 
 env:
   CGO_ENABLED: "0"
@@ -51,7 +51,6 @@ jobs:
       - name: go vet
         run: go vet ./...
 
-      # Action sorgt für saubere Installation + Caching
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -77,6 +76,7 @@ jobs:
 
       - name: Run unit tests (race+coverage)
         run: |
+          set -euo pipefail
           go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
 
       - name: Upload coverage artifact
@@ -157,6 +157,7 @@ jobs:
 
       - name: Trivy FS scan (SARIF)
         run: |
+          set -euo pipefail
           docker run --rm -v "$GITHUB_WORKSPACE":/workspace -w /workspace \
             aquasec/trivy:0.65.0 fs --quiet --format sarif -o trivy-results.sarif --severity HIGH,CRITICAL .
 
@@ -166,7 +167,7 @@ jobs:
           sarif_file: trivy-results.sarif
 
       - name: Gosec scan (SARIF)
-        uses: securego/gosec@master
+        uses: securego/gosec@v2
         with:
           args: "-fmt sarif -out gosec-results.sarif ./..."
 
