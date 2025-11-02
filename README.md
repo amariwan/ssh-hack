@@ -1,6 +1,6 @@
 # 🔐 Enterprise SSH Inventory & Hardening Auditor v2.0
 
-[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/Security-Compliant-green.svg)](SECURITY.md)
 [![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)](CHANGELOG.md)
@@ -40,7 +40,7 @@ Systematically discover, analyze, and harden SSH infrastructure across networks:
 
 ### Prerequisites
 
-- Go 1.24+
+- Go 1.23+
 - Linux/macOS/Windows
 - (Optional) AWS credentials for cloud discovery
 
