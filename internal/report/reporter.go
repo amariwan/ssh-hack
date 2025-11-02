@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/amariwan/ssh-hack/internal/models"
+	"github.com/amariwan/ssh-hack/internal/report/html"
 )
 
 // Reporter generates reports in various formats
@@ -225,6 +226,24 @@ func sarifLevel(severity models.SeverityLevel) string {
 	default:
 		return "none"
 	}
+}
+
+// HTMLReporter generates HTML dashboard reports
+type HTMLReporter struct {
+	generator *html.Generator
+}
+
+func NewHTMLReporter() *HTMLReporter {
+	gen, err := html.NewGenerator()
+	if err != nil {
+		// Fall back to a simple error - this shouldn't happen with embedded templates
+		panic(fmt.Sprintf("failed to create HTML generator: %v", err))
+	}
+	return &HTMLReporter{generator: gen}
+}
+
+func (r *HTMLReporter) Generate(report *models.Report, outputPath string) error {
+	return r.generator.Generate(report, outputPath)
 }
 
 // Helper functions
