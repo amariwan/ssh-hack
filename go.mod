@@ -1,6 +1,8 @@
 module github.com/amariwan/ssh-hack
 
-go 1.25
+go 1.24.0
+
+toolchain go1.24.9
 
 require (
 	github.com/google/uuid v1.6.0
@@ -32,7 +34,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.260.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.32 // indirect (sched build tag)
-	github.com/robfig/cron/v3 v3.0.1 // indirect (sched build tag)
 	github.com/spf13/pflag v1.0.10 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 )
