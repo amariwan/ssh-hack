@@ -58,7 +58,7 @@ vet:
 # Clean build artifacts
 clean:
 	@echo "🧹 Cleaning..."
-	rm -rf $(BUILD_DIR) $(DIST_DIR) coverage.out *.json *.md *.sarif
+	rm -rf $(BUILD_DIR) $(DIST_DIR) coverage.out *.json *.sarif
 	@echo "✅ Clean complete"
 
 # Run the application
