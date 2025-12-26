@@ -16,11 +16,16 @@ RUN go mod download
 # Copy source code
 COPY . .
 
+# List directory contents for debugging
+RUN echo "Contents of /build:" && ls -la /build && \
+    echo "Contents of /build/cmd:" && ls -la /build/cmd 2>/dev/null || echo "cmd directory not found" && \
+    echo "Contents of /build/cmd/ssh-audit:" && ls -la /build/cmd/ssh-audit 2>/dev/null || echo "cmd/ssh-audit directory not found"
+
 # Build binary (static linking)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-w -s -X main.version=$(git describe --tags --always --dirty)" \
     -o ssh-audit \
-    ./cmd/ssh-audit/
+    ./cmd/ssh-audit
 
 # Final stage - minimal runtime image
 FROM alpine:latest

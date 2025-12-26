@@ -21,7 +21,7 @@ GOMOD=$(GOCMD) mod
 build:
 	@echo "🔨 Building $(BINARY) $(VERSION)..."
 	@mkdir -p $(BUILD_DIR)
-	$(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./cmd/ssh-audit/
+	$(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./cmd/ssh-audit
 	@echo "✅ Build complete: $(BUILD_DIR)/$(BINARY)"
 
 # Run tests
