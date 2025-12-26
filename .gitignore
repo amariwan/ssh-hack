@@ -5,8 +5,8 @@
 *.test
 *.out
 
-# Binary
-ssh-audit
+# Binary (but not the cmd/ssh-audit/ directory!)
+/ssh-audit
 build/
 dist/
 .history/
