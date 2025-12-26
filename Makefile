@@ -21,14 +21,7 @@ GOMOD=$(GOCMD) mod
 build:
 	@echo "🔨 Building $(BINARY) $(VERSION)..."
 	@mkdir -p $(BUILD_DIR)
-	# Prefer building from ./cmd/ssh-audit if present, otherwise fall back to ./main.go
-	if [ -d "./cmd/ssh-audit" ] || [ -f "./cmd/ssh-audit/main.go" ]; then \
-		$(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./cmd/ssh-audit; \
-	elif [ -f "./main.go" ]; then \
-		$(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./main.go; \
-	else \
-		echo "No main package found at ./cmd/ssh-audit or ./main.go"; exit 1; \
-	fi
+	$(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./cmd/ssh-audit
 	@echo "✅ Build complete: $(BUILD_DIR)/$(BINARY)"
 
 # Run tests

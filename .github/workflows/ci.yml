@@ -188,8 +188,7 @@ jobs:
       - name: Install gosec
         run: |
           set -euo pipefail
-          # pin gosec to a specific, tested release for reproducible CI
-          go install github.com/securego/gosec/v2/cmd/gosec@v2.24.0
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
 
       - name: Gosec scan (SARIF)
         continue-on-error: true
