@@ -1,6 +1,9 @@
 # Multi-stage build for minimal final image
 FROM golang:1.24-alpine AS builder
 
+# Build metadata (injected from CI)
+ARG VERSION=dev
+
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates
 
@@ -18,7 +21,7 @@ COPY . .
 
 # Build binary (static linking)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-    -ldflags="-w -s -X main.version=$(git describe --tags --always --dirty)" \
+  -ldflags="-w -s -X main.version=${VERSION}" \
     -o ssh-audit \
     ./cmd/ssh-audit
 
