@@ -1,0 +1,55 @@
+services:
+  # Vulnerable SSH Server
+  ssh-vulnerable:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: ssh-vulnerable
+    hostname: vulnerable-host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - PASSWORD_ACCESS=true
+      - USER_PASSWORD=demo123
+      - USER_NAME=demouser
+    ports:
+      - "2222:2222"
+    networks:
+      - ssh-demo
+
+  # Secure SSH Server
+  ssh-secure:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: ssh-secure
+    hostname: secure-host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - PASSWORD_ACCESS=false
+      - USER_NAME=demouser
+      - PUBLIC_KEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEm2... demo@example
+    ports:
+      - "2223:2222"
+    networks:
+      - ssh-demo
+
+  # Moderate SSH Server
+  ssh-moderate:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: ssh-moderate
+    hostname: moderate-host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - PASSWORD_ACCESS=true
+      - USER_PASSWORD=moderate456
+      - USER_NAME=demouser
+    ports:
+      - "2224:2222"
+    networks:
+      - ssh-demo
+
+networks:
+  ssh-demo:
+    driver: bridge

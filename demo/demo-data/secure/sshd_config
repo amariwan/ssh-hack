@@ -1,0 +1,40 @@
+# HARDENED SSH CONFIG - DEMO BEST PRACTICES
+# Based on Mozilla SSH Guidelines
+
+Port 2222
+Protocol 2
+HostKey /config/ssh_host_ed25519_key
+HostKey /config/ssh_host_rsa_key
+
+# Strong authentication only
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+
+# Modern secure ciphers only
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+
+# Security hardening
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding no
+PrintMotd no
+PrintLastLog yes
+TCPKeepAlive yes
+PermitUserEnvironment no
+Compression no
+ClientAliveInterval 300
+ClientAliveCountMax 2
+MaxAuthTries 3
+MaxSessions 5
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Subsystems
+Subsystem sftp /usr/lib/ssh/sftp-server -f AUTHPRIV -l INFO

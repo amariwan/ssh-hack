@@ -1,0 +1,162 @@
+version: "3.8"
+
+services:
+  # SSH Audit Tool
+  ssh-audit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ssh-audit-tool
+    networks:
+      - ssh-demo-network
+    volumes:
+      - ./demo-reports:/app/reports
+      - ./configs:/app/configs:ro
+    entrypoint: ["/bin/sh"]
+    stdin_open: true
+    tty: true
+    depends_on:
+      - ssh-vulnerable
+      - ssh-secure
+      - ssh-moderate
+      - ssh-legacy
+
+  # Vulnerable SSH Server (Weak ciphers and insecure settings)
+  ssh-vulnerable:
+    image: alpine:latest
+    container_name: ssh-vulnerable
+    hostname: vulnerable-host
+    networks:
+      ssh-demo-network:
+        ipv4_address: 172.20.0.10
+    ports:
+      - "2222:22"
+    command: >
+      sh -c "apk add --no-cache openssh-server openssh &&
+             ssh-keygen -A &&
+             echo 'root:vulnerable123' | chpasswd &&
+             adduser -D demouser &&
+             echo 'demouser:demo123' | chpasswd &&
+             mkdir -p /etc/ssh &&
+             echo 'Port 22
+             PermitRootLogin yes
+             PasswordAuthentication yes
+             PubkeyAuthentication yes
+             PermitEmptyPasswords no
+             X11Forwarding yes
+             PrintMotd yes
+             UsePAM no
+             Ciphers aes128-cbc,3des-cbc,aes256-cbc,aes128-ctr
+             MACs hmac-sha1,hmac-md5,hmac-sha2-256
+             KexAlgorithms diffie-hellman-group1-sha1,diffie-hellman-group14-sha1
+             LogLevel INFO
+             ' > /etc/ssh/sshd_config &&
+             /usr/sbin/sshd -D -e"
+
+  # Moderately Secure SSH Server
+  ssh-moderate:
+    image: alpine:latest
+    container_name: ssh-moderate
+    hostname: moderate-host
+    networks:
+      ssh-demo-network:
+        ipv4_address: 172.20.0.11
+    ports:
+      - "2223:22"
+    command: >
+      sh -c "apk add --no-cache openssh-server openssh &&
+             ssh-keygen -A &&
+             adduser -D demouser &&
+             echo 'demouser:moderatepass' | chpasswd &&
+             mkdir -p /home/demouser/.ssh &&
+             echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC0WjXNaK9H9r8KjPQZ demo@example.com' > /home/demouser/.ssh/authorized_keys &&
+             chown -R demouser:demouser /home/demouser/.ssh &&
+             chmod 700 /home/demouser/.ssh &&
+             chmod 600 /home/demouser/.ssh/authorized_keys &&
+             echo 'Port 22
+             PermitRootLogin no
+             PasswordAuthentication yes
+             PubkeyAuthentication yes
+             X11Forwarding no
+             UsePAM no
+             Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+             MACs hmac-sha2-256,hmac-sha2-512
+             KexAlgorithms diffie-hellman-group-exchange-sha256
+             ' > /etc/ssh/sshd_config &&
+             /usr/sbin/sshd -D -e"
+
+  # Secure SSH Server (Hardened configuration)
+  ssh-secure:
+    image: alpine:latest
+    container_name: ssh-secure
+    hostname: secure-host
+    networks:
+      ssh-demo-network:
+        ipv4_address: 172.20.0.12
+    ports:
+      - "2224:22"
+    command: >
+      sh -c "apk add --no-cache openssh-server openssh &&
+             ssh-keygen -A &&
+             adduser -D demouser &&
+             mkdir -p /home/demouser/.ssh &&
+             echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC0WjXNaK9H9r8KjPQZ demo@example.com' > /home/demouser/.ssh/authorized_keys &&
+             chown -R demouser:demouser /home/demouser/.ssh &&
+             chmod 700 /home/demouser/.ssh &&
+             chmod 600 /home/demouser/.ssh/authorized_keys &&
+             echo 'Port 22
+             PermitRootLogin no
+             PasswordAuthentication no
+             PubkeyAuthentication yes
+             AuthenticationMethods publickey
+             PermitEmptyPasswords no
+             ChallengeResponseAuthentication no
+             UsePAM no
+             X11Forwarding no
+             PrintMotd no
+             TCPKeepAlive yes
+             Compression no
+             ClientAliveInterval 300
+             ClientAliveCountMax 2
+             MaxAuthTries 3
+             MaxSessions 5
+             Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+             MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+             KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+             LogLevel VERBOSE
+             ' > /etc/ssh/sshd_config &&
+             /usr/sbin/sshd -D -e"
+
+  # Legacy SSH Server (Older defaults)
+  ssh-legacy:
+    image: alpine:latest
+    container_name: ssh-legacy
+    hostname: legacy-host
+    networks:
+      ssh-demo-network:
+        ipv4_address: 172.20.0.13
+    ports:
+      - "2225:22"
+    command: >
+      sh -c "apk add --no-cache openssh-server openssh &&
+             ssh-keygen -A &&
+             echo 'root:legacy123' | chpasswd &&
+             adduser -D olduser &&
+             echo 'olduser:old123' | chpasswd &&
+             echo 'Port 22
+             PermitRootLogin yes
+             PasswordAuthentication yes
+             PermitEmptyPasswords yes
+             UsePAM no
+             ' > /etc/ssh/sshd_config &&
+             /usr/sbin/sshd -D -e"
+
+networks:
+  ssh-demo-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  demo-reports:

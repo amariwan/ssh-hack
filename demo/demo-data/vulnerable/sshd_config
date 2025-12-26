@@ -1,0 +1,28 @@
+# INTENTIONALLY VULNERABLE SSH CONFIG - FOR DEMO ONLY!
+# DO NOT USE IN PRODUCTION
+
+Port 2222
+Protocol 2
+HostKey /config/ssh_host_rsa_key
+
+# Weak authentication
+PermitRootLogin yes
+PasswordAuthentication yes
+PermitEmptyPasswords no
+PubkeyAuthentication yes
+
+# Weak ciphers and MACs (intentionally insecure for demo)
+Ciphers aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc
+MACs hmac-md5,hmac-sha1,hmac-sha1-96,hmac-md5-96
+KexAlgorithms diffie-hellman-group1-sha1,diffie-hellman-group14-sha1
+
+# Logging
+SyslogFacility AUTH
+LogLevel INFO
+
+# Other settings
+UsePAM yes
+X11Forwarding yes
+PrintMotd yes
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/ssh/sftp-server
