@@ -20,7 +20,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-w -s -X main.version=$(git describe --tags --always --dirty)" \
     -o ssh-audit \
-    ./cmd/ssh-audit
+    ./cmd/ssh-audit/
 
 # Final stage - minimal runtime image
 FROM alpine:latest
