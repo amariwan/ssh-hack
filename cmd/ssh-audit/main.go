@@ -124,6 +124,12 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// If this was a dry-run, do not print summary or write outputs
+	if dryRun {
+		logger.Info("Dry run completed")
+		return nil
+	}
+
 	// Print summary to console
 	printSummary(*auditReport, logger)
 
@@ -441,9 +447,8 @@ func aggregateTargets(logger util.Logger) ([]string, []int, string, error) {
 	importSources := make([]string, 0)
 
 	// Start with CLI allowlist and ports
-	for _, a := range allowlist {
-		targets = append(targets, a)
-	}
+	// append allowlist (may be empty)
+	targets = append(targets, allowlist...)
 	for _, p := range ports {
 		portsSet[p] = struct{}{}
 	}

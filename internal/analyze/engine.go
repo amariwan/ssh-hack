@@ -385,17 +385,17 @@ sudo sed -i 's/\(^\s*KexAlgorithms\s*\)/\1/g' /etc/ssh/sshd_config
 echo 'KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256' | sudo tee -a /etc/ssh/sshd_config
 sudo systemctl restart sshd` , extractAlgorithmName(f.Title))
 		case "cipher":
-			f.RemediationScript = fmt.Sprintf(`# Backup
+			f.RemediationScript = `# Backup
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 # Set modern AEAD ciphers
 echo 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com' | sudo tee -a /etc/ssh/sshd_config
-sudo systemctl restart sshd`)
+sudo systemctl restart sshd`
 		case "mac":
-			f.RemediationScript = fmt.Sprintf(`# Backup
+			f.RemediationScript = `# Backup
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 # Use ETM MACs
 echo 'MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com' | sudo tee -a /etc/ssh/sshd_config
-sudo systemctl restart sshd`)
+sudo systemctl restart sshd`
 		case "hostkey":
 			f.RemediationScript = `# Generate modern host keys
 sudo ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
