@@ -57,6 +57,17 @@ jobs:
           version: latest
           args: --timeout=5m
 
+      - name: gofmt check
+        run: |
+          set -euo pipefail
+          echo "Checking gofmt..."
+          unformatted=$(gofmt -l . | head -n 1 || true)
+          if [ -n "$unformatted" ]; then
+            echo "gofmt found unformatted files:"
+            gofmt -l .
+            exit 1
+          fi
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -138,6 +149,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Lint Dockerfile with hadolint
+        uses: hadolint/hadolint-action@v2
+        with:
+          dockerfile: Dockerfile
+
       - name: Build image (no push on PRs)
         uses: docker/build-push-action@v6
         with:
@@ -173,7 +189,8 @@ jobs:
       - name: Install gosec
         run: |
           set -euo pipefail
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          # pin gosec to a specific, tested release for reproducible CI
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.24.0
 
       - name: Gosec scan (SARIF)
         run: |
