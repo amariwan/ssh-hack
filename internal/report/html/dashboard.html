@@ -156,7 +156,7 @@
             </div>
             <div class="card">
                 <h3>Critical Issues</h3>
-                <div class="value risk-critical">{{index .Report.Summary.FindingsBySeverity "critical"}}</div>
+                <div class="value risk-critical">{{sevCount .Report "critical"}}</div>
                 <div class="subtitle">Require immediate action</div>
             </div>
         </div>

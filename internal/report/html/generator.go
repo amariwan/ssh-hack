@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/amariwan/ssh-hack/internal/models"
@@ -27,6 +28,16 @@ func NewGenerator() (*Generator, error) {
 		"formatDuration": func(d time.Duration) string {
 			return d.Round(time.Second).String()
 		},
+		// lower: lowercase helper used in template
+		"lower": func(s string) string { return strings.ToLower(s) },
+		// mulf/divf: float math helpers for percentage calculation
+		"mulf": func(a, b float64) float64 { return a * b },
+		"divf": func(a, b float64) float64 {
+			if b == 0 {
+				return 0
+			}
+			return a / b
+		},
 		"severityColor": func(sev models.SeverityLevel) string {
 			switch sev {
 			case models.SeverityCritical:
@@ -41,15 +52,31 @@ func NewGenerator() (*Generator, error) {
 				return "#6c757d"
 			}
 		},
+		// riskClass returns base class without prefix; template adds 'risk-'
 		"riskClass": func(score int) string {
 			if score >= 80 {
-				return "risk-critical"
+				return "critical"
 			} else if score >= 60 {
-				return "risk-high"
+				return "high"
 			} else if score >= 40 {
-				return "risk-medium"
+				return "medium"
 			}
-			return "risk-low"
+			return "low"
+		},
+		// sevCount returns the int count for a severity string (critical|high|medium|low|info)
+		"sevCount": func(r *models.Report, s string) int {
+			switch strings.ToLower(s) {
+			case "critical":
+				return r.Summary.FindingsBySeverity[models.SeverityCritical]
+			case "high":
+				return r.Summary.FindingsBySeverity[models.SeverityHigh]
+			case "medium":
+				return r.Summary.FindingsBySeverity[models.SeverityMedium]
+			case "low":
+				return r.Summary.FindingsBySeverity[models.SeverityLow]
+			default:
+				return r.Summary.FindingsBySeverity[models.SeverityInfo]
+			}
 		},
 	}).Parse(dashboardTemplate)
 

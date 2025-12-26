@@ -49,6 +49,9 @@ func (e *Engine) Analyze(sshInfo *models.SSHInfo) []models.Finding {
 	// Check Version/CVEs
 	findings = append(findings, e.checkVersion(sshInfo)...)
 
+	// Attach auto-generated remediation scripts (v2)
+	findings = e.generateRemediationScripts(findings)
+
 	return findings
 }
 
@@ -365,4 +368,61 @@ func severityToScore(sev models.SeverityLevel) int {
 	default:
 		return 0
 	}
+}
+
+// generateRemediationScripts adds simple shell remediation snippets per finding
+func (e *Engine) generateRemediationScripts(findings []models.Finding) []models.Finding {
+	for i := range findings {
+		f := &findings[i]
+		switch f.Category {
+		case "kex":
+			// Remove deprecated/forbidden KEX from sshd_config
+			f.RemediationScript = fmt.Sprintf(`# Backup
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+# Remove %s from KexAlgorithms
+sudo sed -i 's/\(^\s*KexAlgorithms\s*\)/\1/g' /etc/ssh/sshd_config
+# Recommended secure set
+echo 'KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256' | sudo tee -a /etc/ssh/sshd_config
+sudo systemctl restart sshd` , extractAlgorithmName(f.Title))
+		case "cipher":
+			f.RemediationScript = fmt.Sprintf(`# Backup
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+# Set modern AEAD ciphers
+echo 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com' | sudo tee -a /etc/ssh/sshd_config
+sudo systemctl restart sshd`)
+		case "mac":
+			f.RemediationScript = fmt.Sprintf(`# Backup
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+# Use ETM MACs
+echo 'MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com' | sudo tee -a /etc/ssh/sshd_config
+sudo systemctl restart sshd`)
+		case "hostkey":
+			f.RemediationScript = `# Generate modern host keys
+sudo ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
+sudo ssh-keygen -t ecdsa -b 256 -f /etc/ssh/ssh_host_ecdsa_key -N ''
+sudo systemctl restart sshd`
+		case "policy":
+			// Basic policy hardening
+			f.RemediationScript = `# Policy hardening
+sudo sed -i 's/^\s*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^\s*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sudo sed -i 's/^\s*PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+sudo systemctl restart sshd`
+		case "version":
+			// Upgrade guidance
+			f.RemediationScript = `# Upgrade OpenSSH (example for Debian/Ubuntu)
+sudo apt-get update && sudo apt-get install --only-upgrade openssh-server -y
+sudo systemctl restart sshd`
+		}
+	}
+	return findings
+}
+
+func extractAlgorithmName(title string) string {
+	// Extract token after last ': '
+	parts := strings.Split(title, ": ")
+	if len(parts) > 1 {
+		return parts[len(parts)-1]
+	}
+	return title
 }

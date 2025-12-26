@@ -203,8 +203,6 @@ func (s *Scheduler) sendSlackAlert(message string, report *models.Report) {
 
 // executeAudit wraps the main audit logic for scheduler
 func executeAudit(ctx context.Context) (*models.Report, error) {
-	// This would call the main runAudit logic
-	// For now, return stub to avoid circular dependency
-	// In real impl, refactor runAudit to be callable
-	return nil, fmt.Errorf("executeAudit stub: refactor runAudit to package level")
+	// Call the shared audit function defined in main.go
+	return runAudit(ctx)
 }

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SSH Audit — Demo Dashboard</title>
+  <style>
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:24px;background:#f6f8fa;color:#0f172a}
+    .wrap{max-width:1000px;margin:0 auto}
+    header{padding:18px;border-radius:8px;background:linear-gradient(90deg,#334155,#0f172a);color:#fff}
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+    .card{background:#fff;padding:14px;border-radius:8px;box-shadow:0 2px 6px rgba(2,6,23,0.06)}
+    h1{margin:0;font-size:20px}
+    .host{margin:12px 0;padding:12px;background:#fff;border-radius:8px}
+    .finding{padding:12px;border-left:4px solid #e5e7eb;background:#fbfbfc;margin-top:8px}
+    .sev{display:inline-block;padding:4px 10px;border-radius:12px;font-weight:600}
+    .sev-critical{background:#fee2e2;color:#991b1b}
+    .sev-high{background:#ffedd5;color:#7c2d12}
+    details{margin-top:8px}
+    pre{background:#0f172a;color:#e6edf3;padding:10px;border-radius:6px;overflow:auto}
+    footer{margin-top:28px;color:#475569;font-size:13px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🔐 SSH Audit — Demo Dashboard</h1>
+    <div style="margin-top:6px;opacity:0.9">Demo data to exercise HTML layout, remediation and anomalies</div>
+  </header>
+
+  <div class="cards">
+    <div class="card">
+      <div style="font-size:12px;color:#475569">Overall Health</div>
+      <div style="font-size:26px;font-weight:700;margin-top:6px">82 / 100</div>
+      <div style="font-size:12px;color:#94a3b8">Higher is better</div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:#475569">Total Hosts</div>
+      <div style="font-size:26px;font-weight:700;margin-top:6px">3</div>
+      <div style="font-size:12px;color:#94a3b8">Scanned successfully</div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:#475569">Total Findings</div>
+      <div style="font-size:26px;font-weight:700;margin-top:6px">6</div>
+      <div style="font-size:12px;color:#94a3b8">Critical: 1 • High: 2</div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:#475569">Scan ID</div>
+      <div style="font-size:16px;font-weight:700;margin-top:6px">demo-20251226</div>
+      <div style="font-size:12px;color:#94a3b8">Generated demo data</div>
+    </div>
+  </div>
+
+  <section>
+    <h2 style="margin:6px 0">Hosts</h2>
+
+    <div class="host">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>192.0.2.10:22</strong> <small style="color:#64748b">(OpenSSH_8.9)</small></div>
+        <div><span class="sev sev-low">OpenSSH</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:#475569">Handshake: 120ms • KEXs: 6 • Ciphers: 8</div>
+
+      <div class="finding">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Forbidden Cipher: 3des-cbc</strong><div style="font-size:12px;color:#64748b">The cipher '3des-cbc' is forbidden (weak or broken)</div></div>
+          <div><span class="sev sev-critical">critical</span></div>
+        </div>
+        <details>
+          <summary style="cursor:pointer">Remediation script</summary>
+          <pre>sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sudo sed -i 's/^\s*Ciphers.*/Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com/' /etc/ssh/sshd_config
+sudo systemctl restart sshd</pre>
+        </details>
+      </div>
+
+      <div class="finding">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Anomalous rtt</strong><div style="font-size:12px;color:#64748b">Observed 450ms vs expected 30ms (z-score 6.2)</div></div>
+          <div><span class="sev sev-high">high</span></div>
+        </div>
+        <details>
+          <summary style="cursor:pointer">Notes</summary>
+          <div style="padding:8px;color:#334155;font-size:13px">This host shows high RTT; investigate for rate limiting or honeypot behavior.</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="host">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>198.51.100.5:22</strong> <small style="color:#64748b">(Dropbear)</small></div>
+        <div><span class="sev sev-low">Dropbear</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:#475569">Handshake: 80ms • KEXs: 4 • Ciphers: 6</div>
+
+      <div class="finding">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Deprecated Kex Algorithm: diffie-hellman-group-exchange-sha1</strong><div style="font-size:12px;color:#64748b">Use modern alternatives like curve25519-sha256</div></div>
+          <div><span class="sev sev-high">high</span></div>
+        </div>
+        <details>
+          <summary style="cursor:pointer">Remediation script</summary>
+          <pre>sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sudo sed -i 's/^\s*KexAlgorithms.*/KexAlgorithms curve25519-sha256,ecdh-sha2-nistp256/' /etc/ssh/sshd_config
+sudo systemctl restart sshd</pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="host">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>203.0.113.77:22</strong> <small style="color:#64748b">(libssh)</small></div>
+        <div><span class="sev sev-low">libssh</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:#475569">Handshake: 270ms • KEXs: 3 • Ciphers: 5</div>
+
+      <div class="finding">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Host Key Weak: rsa-sha1 1024 bits</strong><div style="font-size:12px;color:#64748b">Key size below minimum (recommended 2048+)</div></div>
+          <div><span class="sev sev-low">low</span></div>
+        </div>
+        <details>
+          <summary style="cursor:pointer">Remediation script</summary>
+          <pre>sudo ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
+sudo systemctl restart sshd</pre>
+        </details>
+      </div>
+    </div>
+
+  </section>
+
+  <footer>
+    Demo report — For interactive runs, run the scanner and generate a real report.
+  </footer>
+</div>
+</body>
+</html>

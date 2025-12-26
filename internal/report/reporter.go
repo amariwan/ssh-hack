@@ -126,8 +126,21 @@ func (r *MarkdownReporter) Generate(report *models.Report, outputPath string) er
 			md.WriteString(fmt.Sprintf("- **Risk Score:** %d/100\n", f.RiskScore))
 			md.WriteString(fmt.Sprintf("- **Description:** %s\n", f.Description))
 			md.WriteString(fmt.Sprintf("- **Remediation:** %s\n", f.Remediation))
+			if f.ImplementationType != "" && f.ImplementationType != models.ImplUnknown {
+				md.WriteString(fmt.Sprintf("- **Implementation:** %s\n", f.ImplementationType))
+			}
 			if len(f.CVEs) > 0 {
 				md.WriteString(fmt.Sprintf("- **CVEs:** %s\n", strings.Join(f.CVEs, ", ")))
+			}
+			if f.AnomalyDetails != nil {
+				md.WriteString(fmt.Sprintf("- **Anomaly:** %s (observed: %.2f, z-score: %.2f)\n",
+					f.AnomalyDetails.MetricName, f.AnomalyDetails.ObservedValue, f.AnomalyDetails.ZScore))
+			}
+			if f.RemediationScript != "" {
+				md.WriteString("\n##### Remediation Script\n\n")
+				md.WriteString("``````\n")
+				md.WriteString(f.RemediationScript)
+				md.WriteString("\n``````\n\n")
 			}
 			md.WriteString("\n")
 		}
