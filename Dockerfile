@@ -26,7 +26,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./cmd/ssh-audit
 
 # Final stage - minimal runtime image
-FROM alpine:latest
+# Pin runtime base image for reproducibility and security
+FROM alpine:3.20
 
 # Install runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata
@@ -55,9 +56,9 @@ ENTRYPOINT ["ssh-audit"]
 # Default help command
 CMD ["--help"]
 
-# Health check (optional - for container orchestration)
+# Health check (shell form to allow conditional)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD ["/usr/local/bin/ssh-audit", "--help"] || exit 1
+  CMD /usr/local/bin/ssh-audit --help || exit 1
 
 # Labels for metadata
 LABEL org.opencontainers.image.title="SSH Security Auditor"

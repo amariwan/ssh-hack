@@ -23,6 +23,7 @@ permissions:
   checks: write
   security-events: write
   pull-requests: read
+  packages: write
 
 defaults:
   run:
